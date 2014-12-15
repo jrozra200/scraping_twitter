@@ -1,0 +1,651 @@
+packageVersion("dplyr")
+cran <- tbl_df(mydf)
+rm("mydf")
+cran
+?select
+select(cran, ip_id, package, country)
+5:20
+select(cran, r_arch:country)
+select(cran, country:r_arch)
+cran
+select(cran, -time)
+-5:20
+-(5:20)
+select(cran, -(X:size))
+filter(cran, package == "swirl")
+filter(cran, r_version == "3.1.1", country == "US")
+?Comparison
+filter(cran, r_version <= "3.0.2", country == "IN")
+filter(cran, country == "US | country == "IN")
+filter(cran, country == "US" | country == "IN")
+filter(cran, size > 100500, r_os == "linux-gnu")
+is.na(c(3, 5, NA, 10))
+!is.na(c(3, 5, NA, 10))
+filter(cran, !(is.na(r_version)))
+filter(cran, !is.na(r_version))
+select(cran, size:ip_id)
+cran2 <- select(cran, size:ip_id)
+arrange(cran2, ip_id)
+arrange(cran2, desc(ip_id))
+arrange(cran2, package, ip_id)
+arrange(cran2, country, desc(r_version) ip_id)
+arrange(cran2, country, desc(r_version), ip_id)
+cran3 <- select(cran, ip_id, package, size)
+cran3
+mutate(cran3, size_mb = size / 2^20)
+mutate(cran3, size_mb = size / 2^20, size_gb = size / 2^10)
+mutate(cran3, size_mb = size / 2^20, size_gb = size_mb / 2^10)
+mutate(cran3, size_mb = size / 2^20, size_gb = size_mb / 2^10, correct_size = size - 1000)
+mutate(cran3, correct_size = size - 1000)
+mutate(cran3, correct_size = size + 1000)
+summarize(cran, avg_bytes = mean(size))
+swirl()
+library(swirl)
+swirl()
+library(dplyer)
+library(dplyr)
+cran <- tbl_df(mydf)
+rm("mydf")
+cran
+?group_by
+by_package <- group_by(cran, package)
+by_package
+summarize(by_package, mean(size))
+?n
+submit()
+pack_sum
+quantile(pack_sum$count, probs = 0.99)
+top_counts <- filter(pack_sum, count > 679)
+top_counts
+head(top_counts, 20)
+arrange(top_counts, count)
+arrange(top_counts, desc(count))
+quantile(pack_sum$unique, probs = 0.99)
+top_unique <- filter(pack_sum, unique > 465)
+top_unique
+arrange(pack_sum, desc(unique))
+arrange(top_unique, desc(unique))
+submit()
+library(swirl)
+swirl()
+submit()
+?spread
+reset()
+submit()
+skip()
+extract_numeric("class5")
+submit()
+?mutate
+submit()
+students4
+submit()
+passed
+failed
+passed <- mutate(passed, "passed")
+passed <- passed %>% mutate(status = "passed")
+failed <- failed %>% mutate(status = "failed")
+rbind_list(passed, failed)
+sat
+?select
+?separate
+submit()
+?group_by
+submit()
+install.packages("RMySQL")
+library(RMySQL)
+install.packages("RMySQL")
+source("http://bioconductor.org/bioclite.R")
+source("http://bioconductor.org/biocLite.R")
+biocLite("rhdf5")
+library(rdhf5)
+library(rhdf5)
+InsectSprays
+with(InsectSprays, tappy(count, spray, mean))
+with(InsectSprays, tapply(count, spray, mean))
+with(InsectSprays, by(count, spray, mean))
+aggregate(count ~ spray, InsectSprays, mean)
+with(InsectSprays, split(count, spray))
+?text
+?postscript
+install.packages("twittR")
+library(lattice)
+x <- rnorm(100)
+y <- rnorm(100)
+xyplot(x,y)
+xyplot(x, y)
+xyplot(y ~ x| f * g)
+?xyplot
+library(nlme)#
+library(lattice)#
+xyplot(weight ~ Time | Diet, BodyWeight)
+x <- xyplot(weight ~ Time | Diet, BodyWeight)
+class(x)
+?lines
+?points
+?llines
+library(lattice)#
+library(datasets)#
+data(airquality)#
+p <- xyplot(Ozone ~ Wind | factor(Month), data = airquality)
+p
+?trellis.par.set
+?print.trellis
+?splom
+?par
+qplot(Wind, Ozone, data = airquality, facets = . ~ factor(Month))
+library(ggplot2)
+install.packages("ggplot2")
+library(ggplot2)
+qplot(Wind, Ozone, data = airquality, facets = . ~ factor(Month))
+qplot(Wind, Ozone, data = airquality)
+airquality = transform(airquality, Month = factor(Month))#
+qplot(Wind, Ozone, data = airquality, facets = . ~ Month)
+?geom
+g <- ggplot(movies, aes(votes, rating))#
+print(g)
+qplot(votes, rating, data = movies)
+qplot(votes, rating, data = movies) + geom_smooth()
+library(twitteR)#
+        consumerKey <- "PNeK9e4a46qZdksDCF9XJ7tGa"#
+        consumerSecret <- "ZCLehrOOlsmGMuvC4M9idmuiUfmpihZay5cmRwt9CYW3W1wM7x"#
+        reqURL <- "https://api.twitter.com/oauth/request_token"#
+        accessURL <- "https://api.twitter.com/oauth/access_token"#
+        authURL <- "https://api.twitter.com/oauth/authorize"#
+        twitCred <- OAuthFactory$new(consumerKey=consumerKey,#
+                                     consumerSecret=consumerSecret,#
+                                     requestURL=reqURL,#
+                                     accessURL=accessURL,#
+                                     authURL=authURL)#
+        twitCred$handshake()
+tweetList <- searchTwitter("comcast email", n = 100, since = "2014-12-11")#
+        tweetList <- twListToDF(tweetList)#
+        fixemail <- grep("(fix.*email)", tweetList$text)#
+        comcastemail <- grep("[Cc]omcast.*email", tweetList$text)#
+        noemail <- grep("no email", tweetList$text)#
+        combined <- c(fixemail, comcastemail, noemail)#
+        uvals <- unique(combined)#
+        sorted <- sort(uvals)#
+        paredTweetList <- tweetList[sorted, c(1, 5, 10, 11)]
+registerTwitterOAuth(twitCred)
+tweetList <- searchTwitter("comcast email", n = 100, since = "2014-12-11")#
+        tweetList <- twListToDF(tweetList)#
+        fixemail <- grep("(fix.*email)", tweetList$text)#
+        comcastemail <- grep("[Cc]omcast.*email", tweetList$text)#
+        noemail <- grep("no email", tweetList$text)#
+        combined <- c(fixemail, comcastemail, noemail)#
+        uvals <- unique(combined)#
+        sorted <- sort(uvals)#
+        paredTweetList <- tweetList[sorted, c(1, 5, 10, 11)]
+paredTweetList
+test <- sapply(paredTweetList$statusSource, sub, "<.*">|</a>", "")
+test <- sapply(paredTweetList$statusSource, sub, "<.*">", "")
+c
+q
+test <- sapply(paredTweetList$statusSource, sub, "<.*\">", "")
+test
+test <- sub("<.*\">", "", paredTweetList$statusSource)
+test
+paredTweetList$statusSource <- sub("<.*\">", "", paredTweetList$statusSource)
+paredTweetList$statusSource <- sub("</a>", "", paredTweetList$statusSource)
+paredTweetList
+names(paredTweetList) <- c("Tweet", "Created", "Source", "ScreenName")
+paredTweetList
+class(paredTweetList)
+write.table(paredTweetList, "testfile.csv", sep = ",", row.names = FALSE)
+test <- read.csv("testfile.csv")
+test
+write.table(paredTweetList, "testfile.csv", sep = ",", row.names = FALSE, qmethod = "double")
+test <- read.csv("testfile.csv")
+test
+tweetList$text
+tweetList
+tweetList$screenNAme
+tweetList$screenName
+custserv <- grep("[Cc]ustomer [Ss]ervice.*email|email.*[Cc]ustomer [Ss]ervice", tweetList$text)
+custserv
+tweetList <- searchTwitter("comcast email", n = 100, since = "2014-12-11")#
+        tweetList <- twListToDF(tweetList)#
+        fixemail <- grep("(fix.*email)", tweetList$text)#
+        comcastemail <- grep("[Cc]omcast.*email", tweetList$text)#
+        noemail <- grep("no email", tweetList$text)#
+        comcasttweet <- grep("[Cc]omcast", tweetList$screenName)#
+        custserv <- grep("[Cc]ustomer [Ss]ervice.*email|email.*[Cc]ustomer [Ss]ervice", tweetList$text)#
+        combined <- c(fixemail, comcastemail, noemail)#
+        uvals <- unique(combined)#
+        sorted <- sort(uvals)#
+        paredTweetList <- tweetList[sorted, c(1, 5, 10, 11)]#
+        paredTweetList$statusSource <- sub("<.*\">", "", paredTweetList$statusSource)#
+        paredTweetList$statusSource <- sub("</a>", "", paredTweetList$statusSource)#
+        names(paredTweetList) <- c("Tweet", "Created", "Source", "ScreenName")
+paredTweetList
+some_txt = sapply(TweetList, function(x) x$getText())
+some_txt = sapply(tweetList, function(x) x$getText())
+# harvest some tweets#
+some_tweets = searchTwitter("starbucks", n=1500, lang="en")#
+#
+# get the text#
+some_txt = sapply(some_tweets, function(x) x$getText())
+?getText
+some_tweets$getText
+paredTweetList$Tweet
+head(some_tweets)
+library(sentiment)#
+library(plyr)#
+library(ggplot2)#
+library(wordcloud)#
+library(RColorBrewer)
+install.packages("wordcloud")
+library(wordcloud)
+weetList <- searchTwitter("comcast email", n = 1000)#
+        tweetList <- twListToDF(tweetList)#
+        fixemail <- grep("(fix.*email)", tweetList$text)#
+        comcastemail <- grep("[Cc]omcast.*email", tweetList$text)#
+        noemail <- grep("no email", tweetList$text)#
+        comcasttweet <- grep("[Cc]omcast", tweetList$screenName)#
+        custserv <- grep("[Cc]ustomer [Ss]ervice.*email|email.*[Cc]ustomer [Ss]ervice", tweetList$text)#
+        combined <- c(fixemail, comcastemail, noemail)#
+        uvals <- unique(combined)#
+        sorted <- sort(uvals)#
+        paredTweetList <- tweetList[sorted, c(1, 5, 10, 11)]#
+        paredTweetList$statusSource <- sub("<.*\">", "", paredTweetList$statusSource)#
+        paredTweetList$statusSource <- sub("</a>", "", paredTweetList$statusSource)#
+        names(paredTweetList) <- c("Tweet", "Created", "Source", "ScreenName")#
+        write.table(paredTweetList, "testfile.csv", sep = ",", row.names = FALSE, qmethod = "double")#
+        ##NOW some sentiment analysis#
+        ##Cleaning up the data some more (just the text now...)#
+        text <- paredTweetList$Tweet#
+        # remove retweet entities#
+        text <- gsub("(RT|via)((?:\\b\\W*@\\w+)+)", "", text)#
+        # remove at people#
+        text <- gsub("@\\w+", "", text)#
+        # remove punctuation#
+        text <- gsub("[[:punct:]]", "", text)#
+        # remove numbers#
+        text <- gsub("[[:digit:]]", "", text)#
+        # remove html links#
+        text <- gsub("http\\w+", "", text)#
+        # remove unnecessary spaces#
+        text <- gsub("[ \t]{2,}", "", text)#
+        text <- gsub("^\\s+|\\s+$", "", text)#
+        # define "tolower error handling" function #
+        try.error <- function(x)#
+        {#
+                # create missing value#
+                y <- NA#
+                # tryCatch error#
+                try_error <- tryCatch(tolower(x), error=function(e) e)#
+                # if not an error#
+                if (!inherits(try_error, "error"))#
+                        y <- tolower(x)#
+                # result#
+                return(y)#
+        }#
+        # lower case using try.error with sapply #
+        text <- sapply(text, try.error)#
+        # remove NAs in text#
+        text <- text[!is.na(text)]#
+        names(text) <- NULL
+tweetList <- searchTwitter("comcast email", n = 1000)#
+        tweetList <- twListToDF(tweetList)#
+        fixemail <- grep("(fix.*email)", tweetList$text)#
+        comcastemail <- grep("[Cc]omcast.*email", tweetList$text)#
+        noemail <- grep("no email", tweetList$text)#
+        comcasttweet <- grep("[Cc]omcast", tweetList$screenName)#
+        custserv <- grep("[Cc]ustomer [Ss]ervice.*email|email.*[Cc]ustomer [Ss]ervice", tweetList$text)#
+        combined <- c(fixemail, comcastemail, noemail)#
+        uvals <- unique(combined)#
+        sorted <- sort(uvals)#
+        paredTweetList <- tweetList[sorted, c(1, 5, 10, 11)]#
+        paredTweetList$statusSource <- sub("<.*\">", "", paredTweetList$statusSource)#
+        paredTweetList$statusSource <- sub("</a>", "", paredTweetList$statusSource)#
+        names(paredTweetList) <- c("Tweet", "Created", "Source", "ScreenName")#
+        write.table(paredTweetList, "testfile.csv", sep = ",", row.names = FALSE, qmethod = "double")#
+        ##NOW some sentiment analysis#
+        ##Cleaning up the data some more (just the text now...)#
+        text <- paredTweetList$Tweet#
+        # remove retweet entities#
+        text <- gsub("(RT|via)((?:\\b\\W*@\\w+)+)", "", text)#
+        # remove at people#
+        text <- gsub("@\\w+", "", text)#
+        # remove punctuation#
+        text <- gsub("[[:punct:]]", "", text)#
+        # remove numbers#
+        text <- gsub("[[:digit:]]", "", text)#
+        # remove html links#
+        text <- gsub("http\\w+", "", text)#
+        # remove unnecessary spaces#
+        text <- gsub("[ \t]{2,}", "", text)#
+        text <- gsub("^\\s+|\\s+$", "", text)#
+        # define "tolower error handling" function #
+        try.error <- function(x)#
+        {#
+                # create missing value#
+                y <- NA#
+                # tryCatch error#
+                try_error <- tryCatch(tolower(x), error=function(e) e)#
+                # if not an error#
+                if (!inherits(try_error, "error"))#
+                        y <- tolower(x)#
+                # result#
+                return(y)#
+        }#
+        # lower case using try.error with sapply #
+        text <- sapply(text, try.error)#
+        # remove NAs in text#
+        text <- text[!is.na(text)]#
+        names(text) <- NULL
+# classify emotion#
+        class_emo <- classify_emotion(text, algorithm="bayes", prior=1.0)#
+        # get emotion best fit#
+        emotion <- class_emo[,7]#
+        # substitute NA's by "unknown"#
+        emotion[is.na(emotion)] <- "unknown"#
+        # classify polarity#
+        class_pol <- classify_polarity(textt, algorithm="bayes")#
+        # get polarity best fit#
+        polarity <- class_pol[,4]
+install.packages("sentiment")
+install.packages("sentiment_0.2.tar.gz")
+library(sentiment)
+install.packages("sentiment140")
+require(devtools)#
+#
+install_github('sentiment140', 'okugami79')
+install.packages("devtools")
+require(devtools)#
+#
+install_github('sentiment140', 'okugami79')
+library(sentiment)
+?sentiment
+# classify emotion#
+        class_emo <- classify_emotion(text, algorithm="bayes", prior=1.0)#
+        # get emotion best fit#
+        emotion <- class_emo[,7]#
+        # substitute NA's by "unknown"#
+        emotion[is.na(emotion)] <- "unknown"
+class_pol <- sentiment(text)
+class_pol
+install.packages("sentiment", repos = "http://www.omegahat.org/R")
+install.packages("Qdap")
+install.packages("qdap")
+library(qdap)
+polarity(text)
+test1 <- polarity(tets)
+test1 <- polarity(text)
+test1
+lapply(text, polarity)
+sapply(text, polarity)
+lapply(text, polarity)
+sentiment(text)
+tweetList <- searchTwitter("comcast email", n = 1000)#
+        tweetList <- twListToDF(tweetList)#
+        fixemail <- grep("(fix.*email)", tweetList$text)#
+        comcastemail <- grep("[Cc]omcast.*email", tweetList$text)#
+        noemail <- grep("no email", tweetList$text)#
+        comcasttweet <- grep("[Cc]omcast", tweetList$screenName)#
+        custserv <- grep("[Cc]ustomer [Ss]ervice.*email|email.*[Cc]ustomer [Ss]ervice", tweetList$text)#
+        combined <- c(fixemail, comcastemail, noemail)#
+        uvals <- unique(combined)#
+        sorted <- sort(uvals)#
+        paredTweetList <- tweetList[sorted, c(1, 5, 10, 11)]#
+        paredTweetList$statusSource <- sub("<.*\">", "", paredTweetList$statusSource)#
+        paredTweetList$statusSource <- sub("</a>", "", paredTweetList$statusSource)#
+        names(paredTweetList) <- c("Tweet", "Created", "Source", "ScreenName")
+text <- paredTweetList$Tweet#
+        # remove retweet entities#
+        text <- gsub("(RT|via)((?:\\b\\W*@\\w+)+)", "", text)#
+        # remove at people#
+        text <- gsub("@\\w+", "", text)#
+        # remove punctuation#
+        text <- gsub("[[:punct:]]", "", text)#
+        # remove numbers#
+        text <- gsub("[[:digit:]]", "", text)#
+        # remove html links#
+        text <- gsub("http\\w+", "", text)
+try.error <- function(x)#
+        {#
+                # create missing value#
+                y <- NA#
+                # tryCatch error#
+                try_error <- tryCatch(tolower(x), error=function(e) e)#
+                # if not an error#
+                if (!inherits(try_error, "error"))#
+                        y <- tolower(x)#
+                # result#
+                return(y)#
+        }#
+        # lower case using try.error with sapply #
+        text <- sapply(text, try.error)#
+        # remove NAs in text#
+        text <- text[!is.na(text)]#
+        names(text) <- NULL
+lapply(text, polarity)
+sentiment(text)
+sent <- sentiment(text)
+names(sent$language) <- "polarity"
+names(sent)
+names(sent[, 3]) <- qdap_polarity
+names(sent[, 3]) <- "qdap_polarity"
+names(sent)
+sent
+afinn_list <- read.delim(file="AFINN-111.txt", header=FALSE, stringsAsFactors=FALSE)#
+names(afinn_list) <- c('word', 'score')#
+afinn_list$word <- tolower(afinn_list$word)
+afinn_list
+vNegTerms <- afinn_list$word[afinn_list$score==-5 | afinn_list$score==-4]#
+        negTerms <- afinn_list$word[afinn_list$score==-3 | afinn_list$score==-2 | afinn_list$score==-1]#
+        posTerms <- afinn_list$word[afinn_list$score==3 | afinn_list$score==2 | afinn_list$score==1]#
+        vPosTerms <- afinn_list$word[afinn_list$score==5 | afinn_list$score==4]#
+        final_scores <- matrix('', 0, 5)#
+        for(i in text) {#
+                vPosMatches <- match(words, vPosTerms)#
+                posMatches <- match(words, posTerms)#
+                vNegMatches <- match(words, vNegTerms)#
+                negMatches <- match(words, negTerms)#
+                #sum up number of words in each category#
+                vPosMatches <- sum(!is.na(vPosMatches))#
+                posMatches <- sum(!is.na(posMatches))#
+                vNegMatches <- sum(!is.na(vNegMatches))#
+                negMatches <- sum(!is.na(negMatches))#
+                score <- c(vNegMatches, negMatches, posMatches, vPosMatches)#
+                #add row to scores table#
+                newrow <- c(initial_sentence, score)#
+                final_scores <- rbind(final_scores, newrow)#
+        }
+for(i in text) {#
+                vPosMatches <- match(i, vPosTerms)#
+                posMatches <- match(i, posTerms)#
+                vNegMatches <- match(i, vNegTerms)#
+                negMatches <- match(i, negTerms)#
+                #sum up number of words in each category#
+                vPosMatches <- sum(!is.na(vPosMatches))#
+                posMatches <- sum(!is.na(posMatches))#
+                vNegMatches <- sum(!is.na(vNegMatches))#
+                negMatches <- sum(!is.na(negMatches))#
+                score <- c(vNegMatches, negMatches, posMatches, vPosMatches)#
+                #add row to scores table#
+                newrow <- c(initial_sentence, score)#
+                final_scores <- rbind(final_scores, newrow)#
+        }
+for(i in text) {#
+                vPosMatches <- match(i, vPosTerms)#
+                posMatches <- match(i, posTerms)#
+                vNegMatches <- match(i, vNegTerms)#
+                negMatches <- match(i, negTerms)#
+                #sum up number of words in each category#
+                vPosMatches <- sum(!is.na(vPosMatches))#
+                posMatches <- sum(!is.na(posMatches))#
+                vNegMatches <- sum(!is.na(vNegMatches))#
+                negMatches <- sum(!is.na(negMatches))#
+                score <- c(vNegMatches, negMatches, posMatches, vPosMatches)#
+                #add row to scores table#
+                newrow <- c(i, score)#
+                final_scores <- rbind(final_scores, newrow)#
+        }
+final_scores
+text
+grepl(text[1], vNegTerms)
+grepl(text, vNegTerms)
+grep(text, vNegTerms)
+grep(text[1], vNegTerms)
+grep(text[1], posTerms)
+grep(text[1], negTerms)
+grep(text[1], vPosTerms)
+match(text[1], posTerms)
+for(word in text[1]) {num <- match(text[word], posTerms)}
+num
+for(i in text) {#
+                for(j in text[i]) {#
+                        vPosMatches <- match(j, vPosTerms)#
+                        posMatches <- match(j, posTerms)#
+                        vNegMatches <- match(j, vNegTerms)#
+                        negMatches <- match(j, negTerms)#
+                        #sum up number of words in each category#
+                        vPosMatches <- sum(!is.na(vPosMatches))#
+                        posMatches <- sum(!is.na(posMatches))#
+                        vNegMatches <- sum(!is.na(vNegMatches))#
+                        negMatches <- sum(!is.na(negMatches))#
+                        score <- c(vNegMatches, negMatches, posMatches, vPosMatches)   #
+                }#
+                #add row to scores table#
+                newrow <- c(i, score)#
+                final_scores <- rbind(final_scores, newrow)#
+        }
+final_scores
+for(i in text) {#
+                wordList <- str_split(i, '\\s+')#
+                words <- unlist(wordList)#
+                vPosMatches <- match(words, vPosTerms)#
+                posMatches <- match(words, posTerms)#
+                vNegMatches <- match(words, vNegTerms)#
+                negMatches <- match(words, negTerms)#
+                #sum up number of words in each category#
+                vPosMatches <- sum(!is.na(vPosMatches))#
+                posMatches <- sum(!is.na(posMatches))#
+                vNegMatches <- sum(!is.na(vNegMatches))#
+                negMatches <- sum(!is.na(negMatches))#
+                score <- c(vNegMatches, negMatches, posMatches, vPosMatches)   #
+                #add row to scores table#
+                newrow <- c(i, score)#
+                final_scores <- rbind(final_scores, newrow)#
+        }
+library(stringr)
+for(i in text) {#
+                wordList <- str_split(i, '\\s+')#
+                words <- unlist(wordList)#
+                vPosMatches <- match(words, vPosTerms)#
+                posMatches <- match(words, posTerms)#
+                vNegMatches <- match(words, vNegTerms)#
+                negMatches <- match(words, negTerms)#
+                #sum up number of words in each category#
+                vPosMatches <- sum(!is.na(vPosMatches))#
+                posMatches <- sum(!is.na(posMatches))#
+                vNegMatches <- sum(!is.na(vNegMatches))#
+                negMatches <- sum(!is.na(negMatches))#
+                score <- c(vNegMatches, negMatches, posMatches, vPosMatches)   #
+                #add row to scores table#
+                newrow <- c(i, score)#
+                final_scores <- rbind(final_scores, newrow)#
+        }
+final_scores
+tweetList <- searchTwitter("comcast email", n = 1000)#
+        tweetList <- twListToDF(tweetList)#
+        fixemail <- grep("(fix.*email)", tweetList$text)#
+        comcastemail <- grep("[Cc]omcast.*email", tweetList$text)#
+        noemail <- grep("no email", tweetList$text)#
+        comcasttweet <- grep("[Cc]omcast", tweetList$screenName)#
+        custserv <- grep("[Cc]ustomer [Ss]ervice.*email|email.*[Cc]ustomer [Ss]ervice", tweetList$text)#
+        combined <- c(fixemail, comcastemail, noemail)#
+        uvals <- unique(combined)#
+        sorted <- sort(uvals)#
+        paredTweetList <- tweetList[sorted, c(1, 5, 10, 11)]#
+        paredTweetList$statusSource <- sub("<.*\">", "", paredTweetList$statusSource)#
+        paredTweetList$statusSource <- sub("</a>", "", paredTweetList$statusSource)#
+        names(paredTweetList) <- c("Tweet", "Created", "Source", "ScreenName")
+text <- paredTweetList$Tweet#
+        # remove retweet entities#
+        text <- gsub("(RT|via)((?:\\b\\W*@\\w+)+)", "", text)#
+        # remove at people#
+        text <- gsub("@\\w+", "", text)#
+        # remove punctuation#
+        text <- gsub("[[:punct:]]", "", text)#
+        # remove numbers#
+        text <- gsub("[[:digit:]]", "", text)#
+        # remove html links#
+        text <- gsub("http\\w+", "", text)#
+        # remove unnecessary spaces#
+        #text <- gsub("[ \t]{2,}", "", text)#
+        #text <- gsub("^\\s+|\\s+$", "", text)#
+        # define "tolower error handling" function #
+        try.error <- function(x)#
+        {#
+                # create missing value#
+                y <- NA#
+                # tryCatch error#
+                try_error <- tryCatch(tolower(x), error=function(e) e)#
+                # if not an error#
+                if (!inherits(try_error, "error"))#
+                        y <- tolower(x)#
+                # result#
+                return(y)#
+        }#
+        # lower case using try.error with sapply #
+        text <- sapply(text, try.error)#
+        # remove NAs in text#
+        text <- text[!is.na(text)]#
+        names(text) <- NULL#
+        #load up word polarity list and format it#
+        afinn_list <- read.delim("AFINN/AFINN-111.txt", header=FALSE, stringsAsFactors=FALSE)#
+        names(afinn_list) <- c('word', 'score')#
+        afinn_list$word <- tolower(afinn_list$word)#
+        vNegTerms <- afinn_list$word[afinn_list$score==-5 | afinn_list$score==-4]#
+        negTerms <- afinn_list$word[afinn_list$score==-3 | afinn_list$score==-2 | afinn_list$score==-1]#
+        posTerms <- afinn_list$word[afinn_list$score==3 | afinn_list$score==2 | afinn_list$score==1]#
+        vPosTerms <- afinn_list$word[afinn_list$score==5 | afinn_list$score==4]#
+        final_scores <- matrix('', 0, 5)#
+        for(i in text) {#
+                wordList <- str_split(i, '\\s+')#
+                words <- unlist(wordList)#
+                vPosMatches <- match(words, vPosTerms)#
+                posMatches <- match(words, posTerms)#
+                vNegMatches <- match(words, vNegTerms)#
+                negMatches <- match(words, negTerms)#
+                #sum up number of words in each category#
+                vPosMatches <- sum(!is.na(vPosMatches))#
+                posMatches <- sum(!is.na(posMatches))#
+                vNegMatches <- sum(!is.na(vNegMatches))#
+                negMatches <- sum(!is.na(negMatches))#
+                score <- c(vNegMatches, negMatches, posMatches, vPosMatches)   #
+                #add row to scores table#
+                newrow <- c(i, score)#
+                final_scores <- rbind(final_scores, newrow)#
+        }
+afinn_list <- read.delim("AFINN/AFINN-111.txt", header=FALSE, stringsAsFactors=FALSE)#
+        names(afinn_list) <- c('word', 'score')#
+        afinn_list$word <- tolower(afinn_list$word)
+afinn_list <- read.delim("AFINN-111.txt", header=FALSE, stringsAsFactors=FALSE)#
+        names(afinn_list) <- c('word', 'score')#
+        afinn_list$word <- tolower(afinn_list$word)#
+        vNegTerms <- afinn_list$word[afinn_list$score==-5 | afinn_list$score==-4]#
+        negTerms <- afinn_list$word[afinn_list$score==-3 | afinn_list$score==-2 | afinn_list$score==-1]#
+        posTerms <- afinn_list$word[afinn_list$score==3 | afinn_list$score==2 | afinn_list$score==1]#
+        vPosTerms <- afinn_list$word[afinn_list$score==5 | afinn_list$score==4]#
+        final_scores <- matrix('', 0, 5)#
+        for(i in text) {#
+                wordList <- str_split(i, '\\s+')#
+                words <- unlist(wordList)#
+                vPosMatches <- match(words, vPosTerms)#
+                posMatches <- match(words, posTerms)#
+                vNegMatches <- match(words, vNegTerms)#
+                negMatches <- match(words, negTerms)#
+                #sum up number of words in each category#
+                vPosMatches <- sum(!is.na(vPosMatches))#
+                posMatches <- sum(!is.na(posMatches))#
+                vNegMatches <- sum(!is.na(vNegMatches))#
+                negMatches <- sum(!is.na(negMatches))#
+                score <- c(vNegMatches, negMatches, posMatches, vPosMatches)   #
+                #add row to scores table#
+                newrow <- c(i, score)#
+                final_scores <- rbind(final_scores, newrow)#
+        }
+final_scores
