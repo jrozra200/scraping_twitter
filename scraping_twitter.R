@@ -143,7 +143,9 @@ scraping_twitter <- function(SearchTerm = "comcast email", numTweets = 100, star
         posperc <- posnum/total
         negperc <- negnum/total
         
-        wordcloud(results$sentence, random.order = FALSE)
+        png(file = "wordcloud.png")
+        wordcloud(results$sentence, scale=c(6, 2), random.order = FALSE, colors=brewer.pal(8, "Paired"))
+        dev.off()
         
         histo <- c(posperc, negperc)
                 
