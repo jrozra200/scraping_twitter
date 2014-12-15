@@ -6,6 +6,7 @@ scraping_twitter <- function(SearchTerm = "comcast email", numTweets = 100, star
         library(ggplot2)
         library(wordcloud)
         library(RColorBrewer)
+        library(plotrix)
         
         load("credentials.RData")
         
@@ -132,6 +133,10 @@ scraping_twitter <- function(SearchTerm = "comcast email", numTweets = 100, star
                 counter <- counter + 1
         }
         
+        png(file = "wordcloud.png")
+        wordcloud(results$sentence, scale=c(6, 2), random.order = FALSE, colors=brewer.pal(8, "Paired"))
+        dev.off()
+        
         postweets <- results[results$sentiment == "positive", ]
         neuttweets <- results[results$sentiment == "neutral", ]
         negtweets <- results[results$sentiment == "negative", ]
@@ -139,16 +144,19 @@ scraping_twitter <- function(SearchTerm = "comcast email", numTweets = 100, star
         total <- dim(results)[1]
         posnum <- dim(postweets)[1]
         negnum <- dim(negtweets)[1]
+        neutnum <- dim(neuttweets)[1]
         
         posperc <- posnum/total
         negperc <- negnum/total
+        neutperc <- neutnum/total
         
-        png(file = "wordcloud.png")
-        wordcloud(results$sentence, scale=c(6, 2), random.order = FALSE, colors=brewer.pal(8, "Paired"))
+        slices <- c(posnum, negnum, neutnum)
+        lbls <- c("Positive", "Negative", "Nuetral")
+        pct <- round(slices/sum(slices)*100)
+        lbls <- paste(lbls, pct)
+        lbls <- paste(lbls, "%", sep = "")
+        
+        png(file = "sentimentpie.png")
+        pie3D(slices, labels=lbls, explode=0.1, main="Overall Sentiment of Comcast Email on Twitter")        
         dev.off()
-        
-        histo <- c(posperc, negperc)
-                
-        hist(histo)
-        
 }
