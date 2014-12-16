@@ -1,26 +1,24 @@
 scraping_twitter <- function(SearchTerm = "comcast email", numTweets = 100, startDay = NULL, endDay = NULL) {
-        library(twitteR)
-        library(sentiment)
-        library(plyr)
-        library(stringr)
-        library(ggplot2)
-        library(wordcloud)
-        library(RColorBrewer)
-        library(plotrix)
+        library(twitteR) ##built in R package that does some of the Twitter API heavy lifting
+        library(stringr) ##Does some of the text editing
+        library(wordcloud) ##Lets me do word clouds
+        library(RColorBrewer) ##Allows for many different color pallets
+        library(plotrix) ##Alows for pie charts
         
-        load("credentials.RData")
+        ##Authentication
+        load("credentials.RData")  ##has my secret keys and shiz
+        registerTwitterOAuth(twitCred) ##logs me in
         
-        registerTwitterOAuth(twitCred)
+        ##Get the tweets to work with
+        tweetList <- searchTwitter("comcast email", n = 1000) ##Searches twitter for anything with comcast and email in it
         
-        tweetList <- searchTwitter("comcast email", n = 1000)
+        tweetList <- twListToDF(tweetList) ##converts that data we got into a data frame
         
-        tweetList <- twListToDF(tweetList)
-        
-        fixemail <- grep("(fix.*email)", tweetList$text)
-        comcastemail <- grep("[Cc]omcast.*email", tweetList$text)
-        noemail <- grep("no email", tweetList$text)
-        comcasttweet <- grep("[Cc]omcast", tweetList$screenName)
-        custserv <- grep("[Cc]ustomer [Ss]ervice.*email|email.*[Cc]ustomer [Ss]ervice", tweetList$text)
+        fixemail <- grep("(fix.*email)", tweetList$text) ##finds the rows that have the phrase "fix ... email" in them
+        comcastemail <- grep("[Cc]omcast.*email", tweetList$text) ##finds the rows that have the phrase "comcast ... email" in them
+        noemail <- grep("no email", tweetList$text) ##finds the rows that have the phrase "no email" in them
+        comcasttweet <- grep("[Cc]omcast", tweetList$screenName) ##finds the rows that originated from a Comcast twitter handle
+        custserv <- grep("[Cc]ustomer [Ss]ervice.*email|email.*[Cc]ustomer [Ss]ervice", tweetList$text) ##finds the rows related to email and customer service
         
         combined <- c(fixemail, comcastemail, noemail)
         uvals <- unique(combined)
