@@ -90,7 +90,7 @@ scraping_twitter <- function(SearchTerm = "comcast email", numTweets = 100, star
         vPosTerms <- afinn_list$word[afinn_list$score==5 | afinn_list$score==4]
         
         ##create a matrix to store the scores and sentiment
-        final_scores <- matrix('', 0, 6)
+        final_scores <- matrix('', 0, 5)
         
         ##go through each sentence in the matrix
         for(i in text) {
@@ -118,6 +118,7 @@ scraping_twitter <- function(SearchTerm = "comcast email", numTweets = 100, star
         
         ##rename the scored data and change it to a data frame
         results <- as.data.frame(final_scores)
+        results <- cbind(results, "sentiment")
         
         ##name the columns
         colnames(results) <- c('sentence', 'vNeg', 'neg', 'pos', 'vPos', 'sentiment')
@@ -171,7 +172,7 @@ scraping_twitter <- function(SearchTerm = "comcast email", numTweets = 100, star
         
         ##create the pie chart slices, labels, and add the percentage
         slices <- c(posnum, negnum, neutnum)
-        lbls <- c("Positive", "Negative", "Nuetral")
+        lbls <- c("Positive", "Negative", "Neutral")
         pct <- round(slices/sum(slices)*100)
         lbls <- paste(lbls, pct)
         lbls <- paste(lbls, "%", sep = "")
