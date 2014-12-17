@@ -1,3 +1,236 @@
+corr <- function(directory, threshold = 0) {#
+        setwd(directory)#
+        data <- complete(getwd()) #gets the number of complete data from the complete function for each file#
+        threshIDs <- vector("numeric") #creates an empty numeric vector to contain those IDs that meet the threshold#
+        for(i in data$id) { #goes through the data obtained in data and identifies the IDs that meet the threshold#
+                if(data$nobs[i] <= threshold) {#
+                        next#
+                } else {#
+                        threshIDs <- append(threshIDs, data$id[i])#
+                }#
+        }#
+        cors <- vector("numeric") #creates an empty vector which will contain the cor values#
+        for(i in threshIDs){#
+                #creates the filename from the number in the loop depending on the size of the number#
+                filename <- if(i < 10) {#
+                        paste("00", i, ".csv", sep = "")#
+                } else if (i >= 10 && i < 100) {#
+                        paste("0", i, ".csv", sep = "")#
+                } else {#
+                        paste(i, ".csv", sep = "")#
+                }#
+                rawdata <- read.csv(filename) #assign the file's data to the variable titled data#
+                iscomplete <- complete.cases(rawdata) #determine which of the cases are complete#
+                gooddata <- rawdata[iscomplete, ] #assign only the good cases to a new variable#
+                sulfate <- gooddata$sulfate #separates out just the good sulfate data#
+                nitrate <- gooddata$nitrate #separates out just the good nitrate data#
+                cors <- append(cors, cor(sulfate, nitrate)) #adds the cor values for each file to the vector#
+        }#
+        cors #returns all the cor values#
+}
+x <- corr("users/jrozra200/Box Documents/Data Science Classes/R Programming/Working Directory")
+corr <- function(directory, threshold = 0) {#
+        setwd(directory)#
+        data <- #complete(getwd()) #gets the number of complete data from the complete function for each file#
+        threshIDs <- vector("numeric") #creates an empty numeric vector to contain those IDs that meet the threshold#
+        for(i in data$id) { #goes through the data obtained in data and identifies the IDs that meet the threshold#
+                if(data$nobs[i] <= threshold) {#
+                        next#
+                } else {#
+                        threshIDs <- append(threshIDs, data$id[i])#
+                }#
+        }#
+        cors <- vector("numeric") #creates an empty vector which will contain the cor values#
+        for(i in threshIDs){#
+                #creates the filename from the number in the loop depending on the size of the number#
+                filename <- if(i < 10) {#
+                        paste("00", i, ".csv", sep = "")#
+                } else if (i >= 10 && i < 100) {#
+                        paste("0", i, ".csv", sep = "")#
+                } else {#
+                        paste(i, ".csv", sep = "")#
+                }#
+                rawdata <- read.csv(filename) #assign the file's data to the variable titled data#
+                iscomplete <- complete.cases(rawdata) #determine which of the cases are complete#
+                gooddata <- rawdata[iscomplete, ] #assign only the good cases to a new variable#
+                sulfate <- gooddata$sulfate #separates out just the good sulfate data#
+                nitrate <- gooddata$nitrate #separates out just the good nitrate data#
+                cors <- append(cors, cor(sulfate, nitrate)) #adds the cor values for each file to the vector#
+        }#
+        cors #returns all the cor values#
+}
+x <- corr("users/jrozra200/Box Documents/Data Science Classes/R Programming/Working Directory")
+corr <- function(directory, threshold = 0) {#
+        #setwd(directory)#
+        data <- complete(getwd()) #gets the number of complete data from the complete function for each file#
+        threshIDs <- vector("numeric") #creates an empty numeric vector to contain those IDs that meet the threshold#
+        for(i in data$id) { #goes through the data obtained in data and identifies the IDs that meet the threshold#
+                if(data$nobs[i] <= threshold) {#
+                        next#
+                } else {#
+                        threshIDs <- append(threshIDs, data$id[i])#
+                }#
+        }#
+        cors <- vector("numeric") #creates an empty vector which will contain the cor values#
+        for(i in threshIDs){#
+                #creates the filename from the number in the loop depending on the size of the number#
+                filename <- if(i < 10) {#
+                        paste("00", i, ".csv", sep = "")#
+                } else if (i >= 10 && i < 100) {#
+                        paste("0", i, ".csv", sep = "")#
+                } else {#
+                        paste(i, ".csv", sep = "")#
+                }#
+                rawdata <- read.csv(filename) #assign the file's data to the variable titled data#
+                iscomplete <- complete.cases(rawdata) #determine which of the cases are complete#
+                gooddata <- rawdata[iscomplete, ] #assign only the good cases to a new variable#
+                sulfate <- gooddata$sulfate #separates out just the good sulfate data#
+                nitrate <- gooddata$nitrate #separates out just the good nitrate data#
+                cors <- append(cors, cor(sulfate, nitrate)) #adds the cor values for each file to the vector#
+        }#
+        cors #returns all the cor values#
+}
+x <- corr("users/jrozra200/Box Documents/Data Science Classes/R Programming/Working Directory")
+complete <- function(directory, id = 1:332) {#
+        setwd(directory) #sets the working directory as specified#
+        counter <- 1 #initializing a counter that will be used to assign the row of the data frame#
+        nobs <- data.frame() #and here is the data frame we will use - initializing it#
+        for(i in id){#
+                #creates the filename from the number in the loop depending on the size of the number#
+                filename <- if(i < 10) {#
+                        paste("00", i, ".csv", sep = "")#
+                } else if (i >= 10 && i < 100) {#
+                        paste("0", i, ".csv", sep = "")#
+                } else {#
+                        paste(i, ".csv", sep = "")#
+                }#
+                data <- read.csv(filename) #assign the file's data to the variable titled data#
+                iscomplete <- complete.cases(data) #determine which of the cases are complete#
+                gooddata <- data[iscomplete, ] #assign only the good cases to a new variable#
+                nobs[counter, 1] <- i #collumn one is the ID of the file we are in#
+                nobs[counter, 2] <- nrow(gooddata) #collumn two is the number of complete cases#
+                counter <- counter + 1 #adding one to go to the next row on the next go round#
+        }#
+        names(nobs) <- c("id", "nobs") #assigns names to our data frame#
+        nobs #returns the data frame with the sums for each file's complete cases#
+}
+x <- corr("users/jrozra200/Box Documents/Data Science Classes/R Programming/Working Directory")
+x <- corr("users/jrozra200/Box Documents/Data Science Classes/R Programming/Working Directory/specdata")
+corr <- function(directory, threshold = 0) {#
+        #setwd(directory)#
+        data <- complete(directory) #gets the number of complete data from the complete function for each file#
+        threshIDs <- vector("numeric") #creates an empty numeric vector to contain those IDs that meet the threshold#
+        for(i in data$id) { #goes through the data obtained in data and identifies the IDs that meet the threshold#
+                if(data$nobs[i] <= threshold) {#
+                        next#
+                } else {#
+                        threshIDs <- append(threshIDs, data$id[i])#
+                }#
+        }#
+        cors <- vector("numeric") #creates an empty vector which will contain the cor values#
+        for(i in threshIDs){#
+                #creates the filename from the number in the loop depending on the size of the number#
+                filename <- if(i < 10) {#
+                        paste("00", i, ".csv", sep = "")#
+                } else if (i >= 10 && i < 100) {#
+                        paste("0", i, ".csv", sep = "")#
+                } else {#
+                        paste(i, ".csv", sep = "")#
+                }#
+                rawdata <- read.csv(filename) #assign the file's data to the variable titled data#
+                iscomplete <- complete.cases(rawdata) #determine which of the cases are complete#
+                gooddata <- rawdata[iscomplete, ] #assign only the good cases to a new variable#
+                sulfate <- gooddata$sulfate #separates out just the good sulfate data#
+                nitrate <- gooddata$nitrate #separates out just the good nitrate data#
+                cors <- append(cors, cor(sulfate, nitrate)) #adds the cor values for each file to the vector#
+        }#
+        cors #returns all the cor values#
+}
+x <- corr("users/jrozra200/Box Documents/Data Science Classes/R Programming/Working Directory/specdata")
+cube <- function(x, n) {#
+        x^3#
+}
+cube(3)
+x <- 1:10#
+if(x > 5) {#
+        x <- 0#
+}
+f <- function(x) {#
+        g <- function(y) {#
+                y + z#
+        }#
+        z <- 4#
+        x + g(x)#
+}
+z <- 10
+f(3)
+x <- 5#
+y <- if(x < 3) {#
+        NA#
+} else {#
+        10#
+}
+y
+cbind(y, 3L)
+list <- random(100)
+list <- rand()
+list <- sample(1:1000000, 10000, replace = TRUE)
+summary(list)
+lapply
+print
+str
+traceback
+debug
+x <- matrix(1:4, 2, 2)
+x
+y <- solve(x)
+y
+x <- matrix(1:400, 20, 20)
+x
+y <- solve(x)
+y
+makeVector <- function(x = numeric()) {#
+        m <- NULL#
+        set <- function(y) {#
+                x <<- y#
+                m <<- NULL#
+        }#
+        get <- function() x#
+        setmean <- function(mean) m <<- mean#
+        getmean <- function() m#
+        list(set = set, get = get,#
+             setmean = setmean,#
+             getmean = getmean)#
+}
+cachemean <- function(x, ...) {#
+        m <- x$getmean()#
+        if(!is.null(m)) {#
+                message("getting cached data")#
+                return(m)#
+        }#
+        data <- x$get()#
+        m <- mean(data, ...)#
+        x$setmean(m)#
+        m#
+}
+x <- vector(1:20)
+x <- 1:20
+cachemean(x)
+x <- makeVector()
+cachemean(x)
+x <- makeVector(1:20)
+cachemean(x)
+library(datasets)#
+data(iris)
+?iris
+mean(iris$Sepal.Length)
+iris$Sepal.Length
+head(iris)
+colmeans(iris)
+colMeans(iris)
+apply(iris[, 1:4], 2, mean)
+library(datasets)#
+data(mtcars)
 head(mtcars)
 str(mtcars)
 tapply(mtcars$mpg, mtcars$cyl, mean)
@@ -193,65 +426,16 @@ g <- ggplot(movies, aes(votes, rating))#
 print(g)
 qplot(votes, rating, data = movies)
 qplot(votes, rating, data = movies) + geom_smooth()
-install.packages("RFacebook")
-install.packages("Rfacebook")
 library(Rfacebook)
-fbOAuth(794002107334373, 6106f709c4c422c84b424fd301fee640)
-fbOAuth("794002107334373", "6106f709c4c422c84b424fd301fee640")
-library(ROAuth)
-fbOAuth("794002107334373", "6106f709c4c422c84b424fd301fee640")
-install.packages("httpuv")
-library(httpuv)
-fbOAuth("794002107334373", "6106f709c4c422c84b424fd301fee640")
-FBcre <- fbOAuth("794002107334373", "6106f709c4c422c84b424fd301fee640")
-save(FBcred, file = "FBCredentials.RData")
-file.create("FBCredentials.RData")
-save(FBcred, file = "FBCredentials.RData")
-FBcred <- fbOAuth("794002107334373", "6106f709c4c422c84b424fd301fee640")
-save(FBcred, file = "FBCredentials.RData")
-load("FBcredentials.RData")
-FBcred
-FBData <- searchFacebook("comcast email", FBcred)
-FBData <- searchFacebook("comcast email", token = FBcred)
-FBData <- searchFacebook(string = "comcast email", token = FBcred)
-FBcred
-FBData <- searchFacebook(string = "comcast email", token = FBcred, n = 10)
 library(devtools)
-FBData <- searchFacebook(string = "comcast email", token = FBcred, n = 10)
-update.packages("httr")
-update.packages("RCurl")
-library(httr)
-library(RCurl)
-FBData <- searchFacebook(string = "comcast email", token = FBcred, n = 10)
-jake <- getUsers(users = "jacob.rozran", token = FBcred)
-FBdata
-FBData
-jake
-FBcred <- fbOAuth("794002107334373", "6106f709c4c422c84b424fd301fee640")
-FBcred <- fbOAuth("794002107334373", "6106f709c4c422c84b424fd301fee640")
-FBData <- searchFacebook(string = "comcast email", token = FBcred, n = 10)
-FBData <- searchFacebook(string = "comcast email", token = FBcred, n = 10)
-FBcred <- fbOAuth("794002107334373", "6106f709c4c422c84b424fd301fee640")
-FBcred <- fbOAuth("794002107334373", "6106f709c4c422c84b424fd301fee640")
-FBcred <- fbOAuth("794002107334373", "6106f709c4c422c84b424fd301fee640")
-FBcred <- fbOAuth("794002107334373", "6106f709c4c422c84b424fd301fee640")
-update.packages()
-FBData <- searchFacebook(string = "comcast email", token = FBcred, n = 10)
-FBData = searchFacebook(string = "comcast email", token = FBcred, n = 10)
-FBData <- searchFacebook(string = URLencode("comcast email"), token = FBcred, n = 10)
 load("FBcredentials.RData")
-FBcred <- fbOAuth("794002107334373", "6106f709c4c422c84b424fd301fee640")
-save(FBcred, file = "FBCredentials.RData")
-FBData <- searchFacebook(string = URLencode("comcast email"), token = FBcred, n = 10)
-FBData <- searchFacebook(string = URLencode("comcast email"), token = FBcred, n = 10)
-FBData <- searchFacebook(string = "comcast email", token = FBcred, n = 10)
-FBData <- searchFacebook(string = URLencode("comcast email"), token = FBcred, n = 10)
-FBData <- searchFacebook(string = URLencode("comcast email"), token = FBcred, n = 10)
-library(httr)
-library(RCurl)
-FBData <- searchFacebook(string = URLencode("comcast email"), token = FBcred, n = 10)
-load("FBcredentials.RData")
-FBcred
-FBData <- searchFacebook(string = URLencode("comcast email"), token = FBcred, n = 10)
-library(devtools)
-FBData <- searchFacebook(string = URLencode("comcast email"), token = FBcred, n = 10)
+library(Rfacebook)#
+        library(Rook)#
+        library(httpuv)#
+        load("fb_oauth")#
+        FBcred#
+        load("fbtoken")#
+        getNewsfeed(token, n=10)
+getNewsfeed(fb_oauth)
+getNewsfeed(FBcred)
+FBcred[1]

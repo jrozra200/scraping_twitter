@@ -20,22 +20,28 @@ scraping_twitter <- function(SearchTerm = "comcast email", numTweets = 100, star
         comcasttweet <- grep("[Cc]omcast", tweetList$screenName) ##finds the rows that originated from a Comcast twitter handle
         custserv <- grep("[Cc]ustomer [Ss]ervice.*email|email.*[Cc]ustomer [Ss]ervice", tweetList$text) ##finds the rows related to email and customer service
         
-        combined <- c(fixemail, comcastemail, noemail)
+        ##combine all of the "good" tweets row numbers that we greped out above and then sorts them and makes sure they are unique
+        combined <- c(fixemail, comcastemail, noemail, comcasttweet, custserv)
         uvals <- unique(combined)
         sorted <- sort(uvals)
         
-        paredTweetList <- tweetList[sorted, c(1, 5, 10, 11)]
-        paredTweetList$statusSource <- sub("<.*\">", "", paredTweetList$statusSource)
+        ##pull the row numbers that we want, and with the columns that are important to us (tweet text, time of tweet, source, and username)
+        paredTweetList <- tweetList[sorted, c(1, 5, 10, 11)] 
+        
+        ##make the device source look nicer
+        paredTweetList$statusSource <- sub("<.*\">", "", paredTweetList$statusSource) 
         paredTweetList$statusSource <- sub("</a>", "", paredTweetList$statusSource)
+        
+        ##name the columns
         names(paredTweetList) <- c("Tweet", "Created", "Source", "ScreenName")
         
-        write.table(paredTweetList, "testfile.csv", sep = ",", row.names = FALSE, qmethod = "double")
+        ##write the output to a csv... commenting this out for now - will bring it back if we pull this into R for visualization
+        ## write.table(paredTweetList, "testfile.csv", sep = ",", row.names = FALSE, qmethod = "double")
         
         
         ##NOW some sentiment analysis
         
-        ##Cleaning up the data some more (just the text now...)
-        
+        ##Cleaning up the data some more (just the text now...) First grabbing only the text
         text <- paredTweetList$Tweet
         
         # remove retweet entities
@@ -48,7 +54,7 @@ scraping_twitter <- function(SearchTerm = "comcast email", numTweets = 100, star
         text <- gsub("[[:digit:]]", "", text)
         # remove html links
         text <- gsub("http\\w+", "", text)
-        # remove unnecessary spaces
+        # remove unnecessary spaces - NEED TO RELOOK AT THIS - didn't seem to work right
         #text <- gsub("[ \t]{2,}", "", text)
         #text <- gsub("^\\s+|\\s+$", "", text)
         
@@ -77,16 +83,22 @@ scraping_twitter <- function(SearchTerm = "comcast email", numTweets = 100, star
         names(afinn_list) <- c('word', 'score')
         afinn_list$word <- tolower(afinn_list$word)
         
+        ##segment the terms for evaluation by severity
         vNegTerms <- afinn_list$word[afinn_list$score==-5 | afinn_list$score==-4]
         negTerms <- afinn_list$word[afinn_list$score==-3 | afinn_list$score==-2 | afinn_list$score==-1]
         posTerms <- afinn_list$word[afinn_list$score==3 | afinn_list$score==2 | afinn_list$score==1]
         vPosTerms <- afinn_list$word[afinn_list$score==5 | afinn_list$score==4]
         
-        final_scores <- matrix('', 0, 5)
+        ##create a matrix to store the scores and sentiment
+        final_scores <- matrix('', 0, 6)
         
+        ##go through each sentence in the matrix
         for(i in text) {
+                ##pull out each word
                 wordList <- str_split(i, '\\s+')
                 words <- unlist(wordList)
+                
+                ##match every class of word
                 vPosMatches <- match(words, vPosTerms)
                 posMatches <- match(words, posTerms)
                 vNegMatches <- match(words, vNegTerms)
@@ -104,22 +116,27 @@ scraping_twitter <- function(SearchTerm = "comcast email", numTweets = 100, star
                 final_scores <- rbind(final_scores, newrow)
         }
         
+        ##rename the scored data and change it to a data frame
         results <- as.data.frame(final_scores)
-        results <- cbind(results, 'sentiment')
         
+        ##name the columns
         colnames(results) <- c('sentence', 'vNeg', 'neg', 'pos', 'vPos', 'sentiment')
         
+        ##coerce the values to numerics (for some reason each value is incremented by 1, so adjusting for this as well)
         results[, 2] <- as.numeric(results[, 2]); results[, 2] <- results[, 2] - 1
         results[, 3] <- as.numeric(results[, 3]); results[, 3] <- results[, 3] - 1
         results[, 4] <- as.numeric(results[, 4]); results[, 4] <- results[, 4] - 1
         results[, 5] <- as.numeric(results[, 5]); results[, 5] <- results[, 5] - 1
-        results[, 6] <- NA
+        results[, 6] <- NA ##empting out the sentiment column, to which we will be adding our answer below
         
+        ##counter for the while statment - we will go through each row in the matrix
         counter <- 1
         
         while(counter <= nrow(results)) {
+                ##calculate the overall sentiment of the tweet
                 sentcount <- (results[counter, 2] * -2) + (results[counter, 3] * -1) + results[counter, 4] + (results[counter, 5] * 2)
                 
+                ##assign the overall sentiment to the sentiment column
                 results[counter, 6] <- if(sentcount < -1) {
                         "negative"
                 } else if(sentcount > 1) {
@@ -131,30 +148,36 @@ scraping_twitter <- function(SearchTerm = "comcast email", numTweets = 100, star
                 counter <- counter + 1
         }
         
-        png(file = "wordcloud.png")
+        ##create the wordcloud and write it to a png
+        ##png(file = "wordcloud.png")
         wordcloud(results$sentence, scale=c(6, 2), random.order = FALSE, colors=brewer.pal(8, "Paired"))
-        dev.off()
+        ##dev.off()
         
+        ##segment the matrix by sentiment
         postweets <- results[results$sentiment == "positive", ]
         neuttweets <- results[results$sentiment == "neutral", ]
         negtweets <- results[results$sentiment == "negative", ]
         
+        ##get a value for the number of rows in each matrix
         total <- dim(results)[1]
         posnum <- dim(postweets)[1]
         negnum <- dim(negtweets)[1]
         neutnum <- dim(neuttweets)[1]
         
+        ##calculate the percentage for each sentiment value
         posperc <- posnum/total
         negperc <- negnum/total
         neutperc <- neutnum/total
         
+        ##create the pie chart slices, labels, and add the percentage
         slices <- c(posnum, negnum, neutnum)
         lbls <- c("Positive", "Negative", "Nuetral")
         pct <- round(slices/sum(slices)*100)
         lbls <- paste(lbls, pct)
         lbls <- paste(lbls, "%", sep = "")
         
-        png(file = "sentimentpie.png")
-        pie3D(slices, labels=lbls, explode=0.1, main="Overall Sentiment of Comcast Email on Twitter")        
-        dev.off()
+        ##create the piechart and write it to a png
+        ##png(file = "sentimentpie.png")
+        ##pie3D(slices, labels=lbls, explode=0.1, main="Overall Sentiment of Comcast Email on Twitter")        
+        ##dev.off()
 }
