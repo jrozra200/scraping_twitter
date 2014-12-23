@@ -1,0 +1,402 @@
+---
+title: "Scraping Twitter for Comcast Email"
+author: "Jacob Rozran"
+---
+
+This document explains my first pass at a sentiment analysis of Twitter to grab those tweets related to Comcast Email.  
+
+The first three steps are part of my scraping\_twitter.R script. Step 4 is my tweet\_clean.R script. Step 5:  
+classify\_emotion.R. Step 6: classify\_polarity.R. Finally, step 7 comes from twitter\_analyis.R, make\_wordcloud.R, and   
+make\_piechart.R scripts. 
+
+## Step 1: Get the Tweets
+
+The first thing I did was search Twitter for tweets that had "Comcast Email" in them. This is done through my  
+scraping_twitter.R script. This step, as well as steps 2 and 3 are part of this script.
+
+The code I used to do this is:  
+  
+```{r getTweets, warning = FALSE, message = FALSE}
+library(twitteR) ##built in R package that does some of the Twitter API heavy lifting
+                
+##Authentication
+load("credentials.RData")  ##has my secret keys and shiz
+registerTwitterOAuth(twitCred) ##logs me in
+        
+##Get the tweets to work with
+tweetList <- searchTwitter("comcast email", n = 1000) ##Searches twitter for anything with comcast and email in it
+        
+tweetList <- twListToDF(tweetList) ##converts that data we got into a data frame to make it easier to do further analysis
+
+```
+
+As you can see, I used the twitteR R Package to authenticate and search Twitter. After getting the tweets, I converted  
+the results to a Data Frame to make it easier to analyze the results.
+
+## Step 2: Get rid of the junk
+
+Many of the tweets returned by my initial search are totally unrelated to Comcast Email. An example of this would be:  
+
+"I am selling something random... please **email** me at myemailaddress@**comcast**.net"
+
+The tweet above includes the words email and comcast, but has nothing to actually do with Comcast Email and the way  
+the user feels about it, other than they use it for their business. 
+
+So... based on some initial, manual, analysis of the tweets, I've decided to pull those tweets with the phrases:
+
+* "fix" AND "email" in them (in that order)
+* "Comcast" AND "email" in them in that order
+* "no email" in them
+* Any tweet that comes from a source with "comcast" in the handle
+* "Customer Service" AND "email" OR the reverse ("email" AND "Customer Service") in them
+
+After pulling out the duplicates (some tweets may fall into multiple scenarios from above) and ensuring they are in  
+order (as returned initially), I assign the relevant tweets to a new variable with only some of the returned columns.
+
+The returned columns are: 
+
+* text
+* favorited
+* favoriteCount
+* replyToSN
+* created
+* truncated
+* replyToSID
+* id
+* replyToUID
+* statusSource
+* screenName
+* retweetCount 
+* isRetweet
+* retweeted
+* longitude
+* latitude 
+
+All I care about are:
+
+* text
+* created
+* statusSource
+* screenName
+
+```{r pareTweets, warning = FALSE}
+fixemail <- grep("(fix.*email)", tweetList$text) ##finds the rows that have the phrase "fix ... email" in them
+comcastemail <- grep("[Cc]omcast.*email", tweetList$text) ##finds the rows that have the phrase "comcast ... email" in them
+noemail <- grep("no email", tweetList$text) ##finds the rows that have the phrase "no email" in them
+comcasttweet <- grep("[Cc]omcast", tweetList$screenName) ##finds the rows that originated from a Comcast twitter handle
+custserv <- grep("[Cc]ustomer [Ss]ervice.*email|email.*[Cc]ustomer [Ss]ervice", tweetList$text) ##finds the rows related to email and customer service
+        
+##combine all of the "good" tweets row numbers that we greped out above and then sorts them and makes sure they are unique
+combined <- c(fixemail, comcastemail, noemail, comcasttweet, custserv)
+uvals <- unique(combined)
+sorted <- sort(uvals)
+        
+##pull the row numbers that we want, and with the columns that are important to us (tweet text, time of tweet, source, and username)
+paredTweetList <- tweetList[sorted, c(1, 5, 10, 11)] 
+
+```
+
+## Step 3: Clean up the data and return the final list
+
+Lastly, for this first script, I make the sources look nice, add titles, and return the final list (only a sample set  
+of tweets shown):
+
+```{r dispTweets, warning = FALSE}
+##make the device source look nicer
+paredTweetList$statusSource <- sub("<.*\">", "", paredTweetList$statusSource) 
+paredTweetList$statusSource <- sub("</a>", "", paredTweetList$statusSource)
+        
+##name the columns
+names(paredTweetList) <- c("Tweet", "Created", "Source", "ScreenName")
+        
+head(paredTweetList, n = 10)
+
+```
+
+### Challenges observed:
+
+As you can see from the output, sometimes some "junk" still gets in. Something I'd like to continue working on is a more  
+reliable algorithm for identifying appropriate tweets. I also am worried that my choice of subjects is biasing the sentiment.
+
+## Step 4: Stripping out the text for analysis
+
+Now that I have the tweets, I needed to strip down the text to do the analysis on it. There are a number of things included  
+in tweets that dont matter for the analysis. Things like twitter handles, URLs, punctuation... they are not necessary to do  
+the analysis. This bit of code handles that cleanup. 
+
+```{r cleanTweets, warning = FALSE}
+library(stringr) ##Does some of the text editing
+        
+##Cleaning up the data some more (just the text now...) First grabbing only the text
+text <- paredTweetList$Tweet
+        
+# remove retweet entities
+text <- gsub("(RT|via)((?:\\b\\W*@\\w+)+)", "", text)
+# remove at people
+text <- gsub("@\\w+", "", text)
+# remove punctuation
+text <- gsub("[[:punct:]]", "", text)
+# remove numbers
+text <- gsub("[[:digit:]]", "", text)
+# remove html links
+text <- gsub("http\\w+", "", text)
+        
+# define "tolower error handling" function 
+try.error <- function(x) {
+        # create missing value
+        y <- NA
+        # tryCatch error
+        try_error <- tryCatch(tolower(x), error=function(e) e)
+        # if not an error
+        if (!inherits(try_error, "error"))
+                y <- tolower(x)
+        # result
+        return(y)
+}
+# lower case using try.error with sapply 
+text <- sapply(text, try.error)
+
+# remove NAs in text
+text <- text[!is.na(text)]
+# remove column names
+names(text) <- NULL
+```
+
+## Step 5: Classify the emotion for each tweet
+
+Now that the code has been cleaned up, I use this code to analyze the tweets. 
+
+This code has been taken from an old R Packaged titled "Sentiment." It is no longer available in R, So I had to pull the  
+code directly from the archive. I've mostly used it as-is, out-of-the-box. I can estimate what it does, but I don't have  
+the best grasp on the code (as I do with the stuff I've created above).
+
+```{r classEmot, warning = FALSE, message = FALSE}
+library(RTextTools)
+library(tm)
+
+algorithm <- "bayes"
+prior <- 1.0
+verbose <- FALSE        
+matrix <- create_matrix(text)
+lexicon <- read.csv("./data/emotions.csv.gz",header=FALSE)
+
+counts <- list(anger=length(which(lexicon[,2]=="anger")),disgust=length(which(lexicon[,2]=="disgust")),fear=length(which(lexicon[,2]=="fear")),joy=length(which(lexicon[,2]=="joy")),sadness=length(which(lexicon[,2]=="sadness")),surprise=length(which(lexicon[,2]=="surprise")),total=nrow(lexicon))
+documents <- c()
+
+for (i in 1:nrow(matrix)) {
+        if (verbose) print(paste("DOCUMENT",i))
+	scores <- list(anger=0,disgust=0,fear=0,joy=0,sadness=0,surprise=0)
+	doc <- matrix[i,]
+	words <- findFreqTerms(doc,lowfreq=1)
+		
+	for (word in words) {
+            for (key in names(scores)) {
+                emotions <- lexicon[which(lexicon[,2]==key),]
+                index <- pmatch(word,emotions[,1],nomatch=0)
+                if (index > 0) {
+                    entry <- emotions[index,]
+                    
+                    category <- as.character(entry[[2]])
+                    count <- counts[[category]]
+        
+                    score <- 1.0
+                    if (algorithm=="bayes") score <- abs(log(score*prior/count))
+            
+                    if (verbose) {
+                        print(paste("WORD:",word,"CAT:",category,"SCORE:",score))
+                    }
+                    
+                    scores[[category]] <- scores[[category]]+score
+                }
+            }
+        }
+        
+        if (algorithm=="bayes") {
+            for (key in names(scores)) {
+                count <- counts[[key]]
+                total <- counts[["total"]]
+                score <- abs(log(count/total))
+                scores[[key]] <- scores[[key]]+score
+            }
+        } else {
+            for (key in names(scores)) {
+                scores[[key]] <- scores[[key]]+0.000001
+            }
+        }
+		
+        best_fit <- names(scores)[which.max(unlist(scores))]
+        if (best_fit == "disgust" && as.numeric(unlist(scores[2]))-3.09234 < .01) best_fit <- NA
+		documents <- rbind(documents,c(scores$anger,scores$disgust,scores$fear,scores$joy,scores$sadness,scores$surprise,best_fit))
+}
+	
+colnames(documents) <- c("ANGER","DISGUST","FEAR","JOY","SADNESS","SURPRISE","BEST_FIT")
+
+head(documents, n = 5)
+
+```
+
+Here you can see that the initial author is using Bayes' theorem to analyze the text. I wanted to show a  
+quick snipet of how the analysis is being done "under the hood."
+
+For my purposes though, I only care about the emotion outputted and the tweet it is analyzed from. 
+
+```{r emo}
+emotion <- documents[, "BEST_FIT"]
+```
+
+This variable, emotion, is returned by the classify\_emotion.R script.
+
+### Challenges observed:
+
+In addition to not fully understanding the code, the emotion classification seems to only work OK. I'd like to come  
+back to this one day to see if I can do a better job analyzing the emotions of the tweets.
+
+## Step 6: Classify the polarity for each tweet
+
+Similarly to what we saw in step 5, I will use the cleaned text to analyze the polarity of each tweet. 
+
+This code has been taken from an old R Packaged titled "Sentiment." It is no longer available in R, So I had to pull the  
+code directly from the archive. I've mostly used it as-is, out-of-the-box. I can estimate what it does, but I don't have  
+the best grasp on the code (as I do with the stuff I've created above).
+
+```{r classPol, warning = FALSE}
+algorithm <- "bayes"
+pstrong <- 0.5
+pweak <- 1.0
+prior <- 1.0
+verbose <- FALSE
+matrix <- create_matrix(text)
+lexicon <- read.csv("./data/subjectivity.csv.gz",header=FALSE)
+
+counts <- list(positive=length(which(lexicon[,3]=="positive")),negative=length(which(lexicon[,3]=="negative")),total=nrow(lexicon))
+documents <- c()
+
+for (i in 1:nrow(matrix)) {
+        if (verbose) print(paste("DOCUMENT",i))
+	scores <- list(positive=0,negative=0)
+	doc <- matrix[i,]
+	words <- findFreqTerms(doc,lowfreq=1)
+		
+	for (word in words) {
+		index <- pmatch(word,lexicon[,1],nomatch=0)
+		if (index > 0) {
+			entry <- lexicon[index,]
+				
+			polarity <- as.character(entry[[2]])
+			category <- as.character(entry[[3]])
+			count <- counts[[category]]
+	
+			score <- pweak
+        if (polarity == "strongsubj") score <- pstrong
+			if (algorithm=="bayes") score <- abs(log(score*prior/count))
+	
+			if (verbose) {
+                                    print(paste("WORD:",word,"CAT:",category,"POL:",polarity,"SCORE:",score))
+			}
+				
+		scores[[category]] <- scores[[category]]+score
+		}		
+	}
+		
+	if (algorithm=="bayes") {
+		for (key in names(scores)) {
+			count <- counts[[key]]
+			total <- counts[["total"]]
+			score <- abs(log(count/total))
+			scores[[key]] <- scores[[key]]+score
+		}
+	} else {
+		for (key in names(scores)) {
+			scores[[key]] <- scores[[key]]+0.000001
+		}
+	}
+		
+best_fit <- names(scores)[which.max(unlist(scores))]
+ratio <- as.integer(abs(scores$positive/scores$negative))
+if (ratio==1) best_fit <- "neutral"
+	documents <- rbind(documents,c(scores$positive,scores$negative,abs(scores$positive/scores$negative),best_fit))
+	if (verbose) {
+		print(paste("POS:",scores$positive,"NEG:",scores$negative,"RATIO:",abs(scores$positive/scores$negative)))
+		cat("\n")
+	}
+}
+	
+colnames(documents) <- c("POS","NEG","POS/NEG","BEST_FIT")
+
+head(documents, n = 5)
+
+```
+
+Here you can see that the initial author is using Bayes' theorem to analyze the text. I wanted to show a  
+quick snipet of how the analysis is being done "under the hood."
+
+For my purposes though, I only care about the polarity outputted and the tweet it is analyzed from. 
+
+```{r pol}
+polarity <- documents[, "BEST_FIT"]
+```
+
+This variable, polarity, is returned by the classify\_polarity.R script.
+
+### Challenges observed:
+
+In addition to not fully understanding the code, the polarity classification seems to only work OK. I'd like to come  
+back to this one day to see if I can do a better job analyzing the polarities of the tweets.
+
+## Step 7: Output the results!
+
+Now that I've analyzed the tweets, there are a few kind of interesting visual representations of the data. 
+
+### Looking at the tweets next to their classificiations
+
+This code simply combines the original tweet text, emotion, and polarity into one data frame, names the columns  
+and then displays the list (here I've only displayed the first 10).
+
+```{r totalFinalOutput, warning = FALSE}
+totalFinalOutput <- cbind(paredTweetList$Tweet, emotion, polarity)
+colnames(totalFinalOutput) <- c("tweet", "emotion", "polarity")
+
+head(totalFinalOutput)
+
+totalFinalOutput <- as.data.frame(totalFinalOutput)
+```
+
+### Seeing a wordcloud of the results
+
+```{r wordcloud, warning = FALSE, message = FALSE}
+library(wordcloud) ##Lets me do word clouds
+library(RColorBrewer) ##Allows for many different color pallets
+
+wordcloud(text, scale=c(6, 2), random.order = FALSE, colors=brewer.pal(8, "Paired"))
+```
+
+### Seeing a pie chart of the overall sentiment
+
+```{r piechart, warning = FALSE}
+library(plotrix) ##Alows for pie charts
+        
+##segment the matrix by sentiment
+postweets <- totalFinalOutput[totalFinalOutput$polarity == "positive", ]
+neuttweets <- totalFinalOutput[totalFinalOutput$polarity == "neutral", ]
+negtweets <- totalFinalOutput[totalFinalOutput$polarity == "negative", ]
+        
+##get a value for the number of rows in each matrix
+total <- dim(totalFinalOutput)[1]
+posnum <- dim(postweets)[1]
+negnum <- dim(negtweets)[1]
+neutnum <- dim(neuttweets)[1]
+        
+##calculate the percentage for each sentiment value
+posperc <- posnum/total
+negperc <- negnum/total
+neutperc <- neutnum/total
+        
+##create the pie chart slices, labels, and add the percentage
+slices <- c(posnum, negnum, neutnum)
+lbls <- c("Positive", "Negative", "Neutral")
+pct <- round(slices/sum(slices)*100)
+lbls <- paste(lbls, pct)
+lbls <- paste(lbls, "%", sep = "")
+
+pie3D(slices, labels=lbls, explode=0.1, main="Overall Sentiment of Comcast Email on Twitter")
+```
