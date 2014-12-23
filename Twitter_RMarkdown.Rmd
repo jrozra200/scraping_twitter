@@ -5,14 +5,13 @@ author: "Jacob Rozran"
 
 This document explains my first pass at a sentiment analysis of Twitter to grab those tweets related to Comcast Email.  
 
-The first three steps are part of my scraping\_twitter.R script. Step 4 is my tweet\_clean.R script. Step 5:  
-classify\_emotion.R. Step 6: classify\_polarity.R. Finally, step 7 comes from twitter\_analyis.R, make\_wordcloud.R, and   
-make\_piechart.R scripts. 
+All of my scripts can be found at [my github page](https://github.com/jrozra200/scraping_twitter)
+
+The first three steps are part of my scraping\_twitter.R script. 
 
 ## Step 1: Get the Tweets
 
-The first thing I did was search Twitter for tweets that had "Comcast Email" in them. This is done through my  
-scraping_twitter.R script. This step, as well as steps 2 and 3 are part of this script.
+The first thing I did was search Twitter for tweets that had "Comcast Email" in them. 
 
 The code I used to do this is:  
   
@@ -124,6 +123,8 @@ Now that I have the tweets, I needed to strip down the text to do the analysis o
 in tweets that dont matter for the analysis. Things like twitter handles, URLs, punctuation... they are not necessary to do  
 the analysis. This bit of code handles that cleanup. 
 
+For those following the scripts on GitHub, this is part of my tweet\_clean.R script.
+
 ```{r cleanTweets, warning = FALSE}
 library(stringr) ##Does some of the text editing
         
@@ -168,7 +169,7 @@ Now that the code has been cleaned up, I use this code to analyze the tweets.
 
 This code has been taken from an old R Packaged titled "Sentiment." It is no longer available in R, So I had to pull the  
 code directly from the archive. I've mostly used it as-is, out-of-the-box. I can estimate what it does, but I don't have  
-the best grasp on the code (as I do with the stuff I've created above).
+the best grasp on the code (as I do with the stuff I've created above). This is my classify\_emotion.R script.
 
 ```{r classEmot, warning = FALSE, message = FALSE}
 library(RTextTools)
@@ -257,7 +258,7 @@ Similarly to what we saw in step 5, I will use the cleaned text to analyze the p
 
 This code has been taken from an old R Packaged titled "Sentiment." It is no longer available in R, So I had to pull the  
 code directly from the archive. I've mostly used it as-is, out-of-the-box. I can estimate what it does, but I don't have  
-the best grasp on the code (as I do with the stuff I've created above).
+the best grasp on the code (as I do with the stuff I've created above). This is my classify\_polarity.R script.
 
 ```{r classPol, warning = FALSE}
 algorithm <- "bayes"
@@ -350,7 +351,8 @@ Now that I've analyzed the tweets, there are a few kind of interesting visual re
 ### Looking at the tweets next to their classificiations
 
 This code simply combines the original tweet text, emotion, and polarity into one data frame, names the columns  
-and then displays the list (here I've only displayed the first 10).
+and then displays the list (here I've only displayed the first 10). This is an excerpt from the incomplete  
+twitter\_analysis.R script.
 
 ```{r totalFinalOutput, warning = FALSE}
 totalFinalOutput <- cbind(paredTweetList$Tweet, emotion, polarity)
@@ -363,6 +365,8 @@ totalFinalOutput <- as.data.frame(totalFinalOutput)
 
 ### Seeing a wordcloud of the results
 
+Which is also available via my make_wordcloud.R script.
+
 ```{r wordcloud, warning = FALSE, message = FALSE}
 library(wordcloud) ##Lets me do word clouds
 library(RColorBrewer) ##Allows for many different color pallets
@@ -371,6 +375,8 @@ wordcloud(text, scale=c(6, 2), random.order = FALSE, colors=brewer.pal(8, "Paire
 ```
 
 ### Seeing a pie chart of the overall sentiment
+
+Which is also available via my make_piechart.R script.
 
 ```{r piechart, warning = FALSE}
 library(plotrix) ##Alows for pie charts
