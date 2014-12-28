@@ -6,7 +6,7 @@ scraping_twitter <- function(SearchTerm = "comcast email", numTweets = 100, star
         registerTwitterOAuth(twitCred) ##logs me in
         
         ##Get the tweets to work with
-        tweetList <- searchTwitter("comcast email", n = 1000) ##Searches twitter for anything with comcast and email in it
+        tweetList <- searchTwitter(searchString = SearchTerm, n = numTweets, since = startDay, until = endDay) ##Searches twitter for anything with comcast and email in it
         
         tweetList <- twListToDF(tweetList) ##converts that data we got into a data frame
         
@@ -16,13 +16,17 @@ scraping_twitter <- function(SearchTerm = "comcast email", numTweets = 100, star
         comcasttweet <- grep("[Cc]omcast", tweetList$screenName) ##finds the rows that originated from a Comcast twitter handle
         custserv <- grep("[Cc]ustomer [Ss]ervice.*email|email.*[Cc]ustomer [Ss]ervice", tweetList$text) ##finds the rows related to email and customer service
         
+        smbiz <- grep("Comcast, I have no email. This is bad for my small business.  Their response", tweetList$text)##This "spam" tweet pops up frequently... Identifying it to remove it.
+        
         ##combine all of the "good" tweets row numbers that we greped out above and then sorts them and makes sure they are unique
         combined <- c(fixemail, comcastemail, noemail, comcasttweet, custserv)
         uvals <- unique(combined)
         sorted <- sort(uvals)
+        rem <- !(sorted %in% smbiz)
+        finalvalues <- sorted[rem]
         
         ##pull the row numbers that we want, and with the columns that are important to us (tweet text, time of tweet, source, and username)
-        paredTweetList <- tweetList[sorted, c(1, 5, 10, 11)] 
+        paredTweetList <- tweetList[finalvalues, c(1, 5, 10, 11)] 
         
         ##make the device source look nicer
         paredTweetList$statusSource <- sub("<.*\">", "", paredTweetList$statusSource) 
